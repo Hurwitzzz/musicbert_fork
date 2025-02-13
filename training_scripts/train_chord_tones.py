@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import time
+from dotenv import load_dotenv
 from itertools import count
 
 logging.basicConfig(level=logging.INFO)
@@ -25,6 +26,7 @@ def shell(cmd):
 # For the sake of reproducibility, we want to commit all changes in the directory before
 # running. Then we can get the git hash and command from wandb to reproduce (hopefully!)
 
+load_dotenv()
 if not os.getenv("DEBUG_MUSICBERT", None):
     uncommited_changes = shell("git status --porcelain")
     if uncommited_changes:
