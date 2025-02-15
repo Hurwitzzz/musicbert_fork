@@ -360,7 +360,19 @@ else:
             # Counterintuitively, the command name (`fairseq_train`) needs to be the first element
             #   in the the list of arguments
             # os.execvp("fairseq-train", ["fairseq-train"] + TRAIN_ARGS)
-            subprocess.run(["fairseq-train"] + TRAIN_ARGS, check=True)
+            # subprocess.run(["fairseq-train"] + TRAIN_ARGS, check=True)
+            from fairseq_cli.train import cli_main
+            def run_fairseq_train(args_list):
+                import sys
+                original_argv = sys.argv
+                try:
+                    # Temporarily replace sys.argv with the arguments you need
+                    sys.argv = ["fairseq-train"] + args_list
+                    cli_main()
+                finally:
+                    sys.argv = original_argv
+
+            run_fairseq_train(TRAIN_ARGS)
 
     if args.skip_test_metrics:
         LOGGER.info("found --skip-test-metrics flag, skipping test metrics")

@@ -186,8 +186,8 @@ class MultiTaskSequenceTaggingCriterion(FairseqCriterion):
             self.save_inputs(sample)
 
         multi_logits = self.get_logits(model, sample)
-
-        adjusted_ntokens = sample["ntokens"] // self.compound_token_ratio
+        
+        adjusted_ntokens = sample["ntokens"] // self.compound_token_ratio #TODO: Question, what is compound_token_ration? Why do we need this?
         nsentences = sample["target0"].size(0)
         sample_size = adjusted_ntokens - nsentences  # number of tokens without eos
 
@@ -206,7 +206,7 @@ class MultiTaskSequenceTaggingCriterion(FairseqCriterion):
         masked_targets_list = []
         for i, logits in enumerate(multi_logits):
             targets = sample[f"target{i}"].view(-1)
-            logits = logits.view(-1, logits.size(-1))
+            logits = logits.view(-1, logits.size(-1)) # logits.shape = (batch_size * seq_len, num_classes)
             this_loss = F.nll_loss(
                 F.log_softmax(logits, dim=-1, dtype=torch.float32),
                 targets,
@@ -218,7 +218,7 @@ class MultiTaskSequenceTaggingCriterion(FairseqCriterion):
             # To get the same behavior as the original implementation we should ignore
             #   all specials, not just pad. Not sure if we want to do this.
 
-            these_masked_preds = (
+            these_masked_preds = ( # these_masked_preds.shape[0] is exactly equal to "adjusted_ntokens", which I guess is the number of real tokens in the batch (excluding padding)
                 (logits[targets != self.pad_idx].argmax(dim=1)).detach().cpu().numpy()
             )
             these_masked_targets = (
@@ -260,7 +260,7 @@ class MultiTaskSequenceTaggingCriterion(FairseqCriterion):
                 )
                 loss = scaled_losses.sum()
             else:
-                loss = loss_stack.mean()
+                loss = loss_stack.mean() # averge loss over all 9 tasks
         else:
             if self.use_liebel_loss:
                 raise NotImplementedError
@@ -359,7 +359,7 @@ class MultiTaskSequenceTaggingCriterion(FairseqCriterion):
                 metrics.log_scalar(f"precision_{average}", precision)  # type:ignore
                 metrics.log_scalar(f"recall_{average}", recall)  # type:ignore
                 metrics.log_scalar(f"f1_{average}", f1)  # type:ignore
-            balanced_accuracy = sklearn.metrics.balanced_accuracy_score(y_true, y_pred)
+            balanced_accuracy = sklearn.metrics.balanced_accuracy_score(y_true, y_pred) # averaging recall for each class
             metrics.log_scalar(f"balanced_accuracy", balanced_accuracy)
 
         n_special = TARGET_INFO["n_specials"]
