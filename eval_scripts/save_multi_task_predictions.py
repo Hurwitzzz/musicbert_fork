@@ -60,6 +60,7 @@ def parse_args():
     parser.add_argument("--msdebug", action="store_true")
     parser.add_argument("--overwrite", "-o", action="store_true")
     parser.add_argument("--ignore-specials", type=int, default=4)
+    parser.add_argument('--example-network-inputs-path', type=str, default=None) # To avoid "unrecognized arguments" error.
     parser.add_argument(
         "--task", default="musicbert_multitask_sequence_tagging", type=str
     )
