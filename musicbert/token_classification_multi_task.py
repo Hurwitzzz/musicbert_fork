@@ -185,7 +185,7 @@ class MultiTaskSequenceTaggingCriterion(FairseqCriterion):
         if self.remaining_inputs_to_save:
             self.save_inputs(sample)
 
-        multi_logits = self.get_logits(model, sample)
+        multi_logits = self.get_logits(model, sample) # (Hewei 2025-03-20) what does "multi" mean?
         
         adjusted_ntokens = sample["ntokens"] // self.compound_token_ratio #TODO: Question, what is compound_token_ration? Why do we need this?
         nsentences = sample["target0"].size(0)
